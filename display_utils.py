@@ -53,36 +53,44 @@ class DEVMODE(ctypes.Structure):
 EnumDisplayDevices = ctypes.windll.user32.EnumDisplayDevicesW
 EnumDisplaySettings = ctypes.windll.user32.EnumDisplaySettingsW
 
-def primary_display_name():
+def find_internal_monitor_id():
     """Return the name of the primary display device."""
     i = 0
     while True:
-        device = DISPLAY_DEVICE()
-        device.cb = ctypes.sizeof(DISPLAY_DEVICE)
-        if not EnumDisplayDevices(None, i, ctypes.byref(device), 0):
+        adapter = DISPLAY_DEVICE()
+        adapter.cb = ctypes.sizeof(adapter)
+        if not EnumDisplayDevices(None, i, ctypes.byref(adapter), 0):
             break
-        
-        # print(EnumDisplayDevices(None, i, ctypes.byref(device), 0))
-        # print(f"Device {i}: {device.DeviceString}")
-        # print(f"  Name: {device.DeviceName}")
-        # print(f"  Active: {bool(device.StateFlags & DISPLAY_DEVICE_ACTIVE)}")
-        # print(f"  DIS: {DISPLAY_DEVICE_ACTIVE}")
-        # print(f"  DIS_PRI: {DISPLAY_DEVICE_PRIMARY_DEVICE}")
-        # print(f"  Primary: {bool(device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)}")
-        # print(f"  DeviceID: {device.DeviceID}")
-        # print(f"  StateFlags: {device.StateFlags}")
-        # print(f"  Key: {device.DeviceKey}\n")
-        
-        
-        if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE
-                and device.StateFlags & DISPLAY_DEVICE_ACTIVE):
-            return device.DeviceName
+        j = 0
+        while True:
+            mon = DISPLAY_DEVICE()
+            mon.cb = ctypes.sizeof(mon)
+            if not EnumDisplayDevices(adapter.DeviceName, j, ctypes.byref(mon), 0):
+                break
+            
+            if adapter.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE:
+                prefix = mon.DeviceID.split("\\{")[0]  # e.g. 'MONITOR\SDC416E'
+            return prefix, mon.DeviceName
+            j += 1
         i += 1
-    return None
+    return None, None
 
-def is_display_active(device_name):
+def is_display_active(stored_prefix):
     """Check if the given display device is active."""
-    devmode = DEVMODE()
-    devmode.dmSize = ctypes.sizeof(DEVMODE)
-    result = EnumDisplaySettings(device_name, -1, ctypes.byref(devmode))
-    return result != 0
+    i = 0
+    while True:
+        adapter = DISPLAY_DEVICE()
+        adapter.cb = ctypes.sizeof(adapter)
+        if not EnumDisplayDevices(None, i, ctypes.byref(adapter), 0):
+            break
+        j = 0
+        while True:
+            mon = DISPLAY_DEVICE()
+            mon.cb = ctypes.sizeof(mon)
+            if not EnumDisplayDevices(adapter.DeviceName, j, ctypes.byref(mon), 0):
+                break
+            if mon.DeviceID.startswith(stored_prefix):
+                return bool(mon.StateFlags & DISPLAY_DEVICE_ACTIVE)
+            j += 1
+        i += 1
+    return False
