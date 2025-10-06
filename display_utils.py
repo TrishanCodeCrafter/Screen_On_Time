@@ -70,14 +70,15 @@ def find_internal_monitor_id():
             
             if adapter.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE:
                 prefix = mon.DeviceID.split("\\{")[0]  # e.g. 'MONITOR\SDC416E'
-            return prefix, mon.DeviceName
+                return prefix
             j += 1
         i += 1
     return None, None
 
 def is_display_active(stored_prefix):
-    """Check if the given display device is active."""
+    #Check if the given display device is active.
     i = 0
+    found = False
     while True:
         adapter = DISPLAY_DEVICE()
         adapter.cb = ctypes.sizeof(adapter)
@@ -90,7 +91,9 @@ def is_display_active(stored_prefix):
             if not EnumDisplayDevices(adapter.DeviceName, j, ctypes.byref(mon), 0):
                 break
             if mon.DeviceID.startswith(stored_prefix):
-                return bool(mon.StateFlags & DISPLAY_DEVICE_ACTIVE)
+                found = True
+                if mon.StateFlags & DISPLAY_DEVICE_ACTIVE:
+                    return True
             j += 1
         i += 1
-    return False
+    return False if found else None  # None → prefix not found at all

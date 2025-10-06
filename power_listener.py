@@ -6,20 +6,18 @@ import uuid
 import threading
 
 PBT_POWERSETTINGCHANGE = 0x8013 # Power setting change constant, basically display state change
-WM_POWERBROADCAST = 0x0218 # Power broadcast message for display changes, like projection mode change
-PBT_APMPOWERSTATUSCHANGE = 0x0A  # Battery/AC change
+WM_POWERBROADCAST = 0x0218 # Power broadcast message for display changes like screen on/off
+
 
 GUID_CONSOLE_DISPLAY_STATE = uuid.UUID('{6FE69556-704A-47A0-8F24-C28D936FDA47}')
 
 class PowerEventListener:
     def __init__(self, callback=None):
         """
-        callback: function(display_on: bool, state: str, on_ac: bool) -> None
-        state = 'ON', 'OFF', 'DIMMED'
-        on_ac = True if plugged in, False if on battery
+        callback: function(display_on: bool, state: str) -> None
+        state = 'ON', 'OFF', 'DIMMED', 'SUSPEND', 'RESUME'
         """
         self.display_on = True
-        self.on_ac = True
         self.callback = callback
         self.thread = threading.Thread(target=self._create_message_window, daemon=True)
         self.thread.start()
@@ -47,15 +45,10 @@ class PowerEventListener:
         self._register_power_setting_notification(hwnd)
         win32gui.PumpMessages()
 
-    def _check_power_status(self):
-        status = win32api.GetSystemPowerStatus()
-        print("Status", status)
-        self.on_ac = status.ACLineStatus == 1
-
     def _wnd_proc(self, hwnd, msg, wparam, lparam):
-        display_event = None
         if msg == WM_POWERBROADCAST:
             if wparam == PBT_POWERSETTINGCHANGE:
+                # Handle monitor ON/OFF/DIM
                 class GUID(ctypes.Structure):
                     _fields_ = [
                         ("Data1", ctypes.c_uint32),
@@ -75,32 +68,27 @@ class PowerEventListener:
                 data = setting.Data[0]
 
                 if guid == GUID_CONSOLE_DISPLAY_STATE:
-                    # if data == 0:
-                    #     self.display_on = False
-                    #     display_event = "OFF"
-                    # elif data == 1:
-                    #     self.display_on = True
-                    #     display_event = "ON"
-                    # elif data == 2:
-                    #     display_event = "DIMMED"
-                        
-                    if data == 0: 
+                    if data == 0: # Display off
                         self.display_on = False 
                         if self.callback: 
-                            self.callback(False, "OFF", self.on_ac) 
-                    elif data == 1: 
+                            self.callback(False, "OFF") 
+                    elif data == 1: # Display on
                         self.display_on = True 
                         if self.callback: 
-                            self.callback(True, "ON", self.on_ac) 
-                    elif data == 2: 
+                            self.callback(True, "ON") 
+                    elif data == 2: # Display dimmed
                         if self.callback: 
-                            self.callback(True, "DIMMED", self.on_ac)
+                            self.callback(True, "DIMMED")
+            
+            elif wparam == win32con.PBT_APMSUSPEND:
+                # System is going to sleep
+                if self.callback:
+                    self.callback(False, "SUSPEND")
 
-            elif wparam == PBT_APMPOWERSTATUSCHANGE:
-                self._check_power_status()
-
-        # Call callback if any relevant event occurred
-        # if self.callback:
-        #     self.callback(self.display_on, display_event, self.on_ac)
+            elif wparam in (win32con.PBT_APMRESUMESUSPEND, win32con.PBT_APMRESUMEAUTOMATIC):
+                # System woke up
+                if self.callback:
+                    self.callback(True, "RESUME")
+           
 
         return win32gui.DefWindowProc(hwnd, msg, wparam, lparam)
