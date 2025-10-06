@@ -4,6 +4,7 @@ class TimeTracker:
     def __init__(self):
         self.start_time = None
         self.total_time = 0
+        self.last_60_sot_record = []
 
     def start(self):
         self.start_time = time.time()
@@ -36,4 +37,19 @@ class TimeTracker:
         battery_used = start_battery_level - current_battery_level
         sot_so_far = self.get_total_time()
         
-        return self.time_formatting((sot_so_far / battery_used) * 100) if battery_used > 0 else "N/A"
+        # Maintain a record of the last 60 SOT estimates
+        last_60_sot_record = self.last_60_sot_record
+        
+        if battery_used <= 0:
+            last_60_sot_record.clear()
+            return "Calculating..."
+        
+        # Pretty straightforward moving average calculation
+        if len(last_60_sot_record) < 60:
+            last_60_sot_record.append((sot_so_far / battery_used) * 100)
+        else:
+            last_60_sot_record.pop(0)
+            last_60_sot_record.append((sot_so_far / battery_used) * 100)
+        avg_sot_last_60 = sum(last_60_sot_record) / len(last_60_sot_record)
+        
+        return self.time_formatting(avg_sot_last_60)

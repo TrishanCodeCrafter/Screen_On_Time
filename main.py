@@ -120,7 +120,7 @@ def main():
         
 
     except KeyboardInterrupt:
-        print(f"Exiting... Final screen time: {tracker.get_total_time()} seconds")
+        print(f"Exiting... Final screen time: {tracker.get_total_time(formatting=True)} seconds")
 
 if __name__ == "__main__":
     main()
