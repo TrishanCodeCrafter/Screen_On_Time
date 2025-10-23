@@ -110,13 +110,19 @@ def main():
             # Keep track of previous power state for next iteration
             previous_power_state = power_state
 
+            # Get current battery level
+            current_battery_level = win32api.GetSystemPowerStatus()['BatteryLifePercent']
+
+            # For display purposes                    
+            battery_used = session_battery_level - current_battery_level if session_battery_level >= current_battery_level else 0
 
             # Calculate SOT estimate only if on battery
             if power_state == 0:
-                current_battery_level = win32api.GetSystemPowerStatus()['BatteryLifePercent']
                 SOT_Estimate = tracker.sot_estimate(current_battery_level, session_battery_level)
-                
-            print(f"⏱ Total time so far: {tracker.get_total_time(formatting=True)} seconds | 🔋 Session battery level: {session_battery_level}% | SOT Estimate: {SOT_Estimate}")
+              
+            
+
+            print(f"⏱ Total time so far: {tracker.get_total_time(formatting=True)} for {battery_used}% drop | 🔋 Session battery level: {session_battery_level}% | SOT Estimate: {SOT_Estimate}")
         
 
     except KeyboardInterrupt:
