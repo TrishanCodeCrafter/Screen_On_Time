@@ -114,7 +114,7 @@ def main():
             current_battery_level = win32api.GetSystemPowerStatus()['BatteryLifePercent']
 
             # For display purposes                    
-            battery_used = session_battery_level - current_battery_level if session_battery_level >= current_battery_level else 0
+            battery_used = session_battery_level - current_battery_level if power_state == 0 else "N/A"
 
             # Calculate SOT estimate only if on battery
             if power_state == 0:
