@@ -1,6 +1,6 @@
 Requirements:
-  VSCode
-  Python
+VSCode
+Python
 
 clone this repo
 
