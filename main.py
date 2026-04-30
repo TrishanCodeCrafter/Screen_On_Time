@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import datetime
 import win32api
 import display_utils
 from time_tracker import TimeTracker
@@ -122,7 +123,7 @@ def main():
               
             
 
-            print(f"⏱ Total time so far: {tracker.get_total_time(formatting=True)} for {battery_used}% drop | 🔋 Session battery level: {session_battery_level}% | SOT Estimate: {SOT_Estimate}")
+            print(f"Time Stamp: {datetime.datetime.now().replace(microsecond=0)} | ⏱ Total time so far: {tracker.get_total_time(formatting=True)} for {battery_used}% drop | 🔋 Session battery level: {session_battery_level}% | SOT Estimate: {SOT_Estimate}")
         
 
     except KeyboardInterrupt:
