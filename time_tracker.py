@@ -42,7 +42,7 @@ class TimeTracker:
         
         if battery_used <= 0:
             last_60_sot_record.clear()
-            return "Calculating..."
+            return ("Calculating...", 0)
         
         # Pretty straightforward moving average calculation
         if len(last_60_sot_record) < 60:
@@ -52,4 +52,4 @@ class TimeTracker:
             last_60_sot_record.append((sot_so_far / battery_used) * 100)
         avg_sot_last_60 = sum(last_60_sot_record) / len(last_60_sot_record)
         
-        return self.time_formatting(avg_sot_last_60)
+        return (self.time_formatting(avg_sot_last_60), avg_sot_last_60)

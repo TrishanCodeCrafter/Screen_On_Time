@@ -82,11 +82,22 @@ class PowerEventListener:
             
             elif wparam == win32con.PBT_APMSUSPEND:
                 # System is going to sleep
+                
+                # To dedupe Windows' duplicate RESUME notifications, we need to remember that we are now suspended.
+                self._is_suspended = True
+                
                 if self.callback:
                     self.callback(False, "SUSPEND")
 
             elif wparam in (win32con.PBT_APMRESUMESUSPEND, win32con.PBT_APMRESUMEAUTOMATIC):
                 # System woke up
+                
+                if not self._is_suspended:
+                    # This is a duplicate RESUME notification, ignore it.
+                    return win32gui.DefWindowProc(hwnd, msg, wparam, lparam)
+                
+                self._is_suspended = False
+                
                 if self.callback:
                     self.callback(True, "RESUME")
            
