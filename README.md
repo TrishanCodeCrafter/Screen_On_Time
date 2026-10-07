@@ -8,6 +8,12 @@ The Screen On Time Tracker monitors your laptop display and power state while yo
 ![Python](https://img.shields.io/badge/python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/license-add%20your%20license-lightgrey?style=flat-square)
 
+<img width="1264" height="819" alt="image" src="https://github.com/user-attachments/assets/706934e4-f76f-47b1-8fa8-e854cee76604" />
+
+<img width="1274" height="841" alt="image" src="https://github.com/user-attachments/assets/f8ffb3c8-53aa-4de4-9069-a7c5abb8fc43" />
+
+
+
 ## Features
 
 - Live terminal dashboard with screen time, battery level, battery used, and estimates.
