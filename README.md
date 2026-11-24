@@ -13,6 +13,10 @@ The Screen On Time Tracker monitors your laptop display and power state while yo
 <img width="1274" height="841" alt="image" src="https://github.com/user-attachments/assets/f8ffb3c8-53aa-4de4-9069-a7c5abb8fc43" />
 
 
+## Coming soon...
+
+<img width="2788" height="1213" alt="Screenshot 2026-09-30 211327" src="https://github.com/user-attachments/assets/cda2b7af-d3c0-4cfa-bb6c-cf324c216f95" />
+
 
 ## Features
 
